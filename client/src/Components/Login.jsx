@@ -1,13 +1,12 @@
 import React from 'react';
-import './App.css';
 
-class App extends React.Component {
-  constructor (props) {
+class Login extends React.Component {
+  constructor(props) {
     super(props);
     this.state = {
       response: ''
-    }
-  };
+    };
+  }
 
   componentDidMount() {
     this.callApi()
@@ -24,15 +23,13 @@ class App extends React.Component {
     return body;
   };
 
-  render() {
+  render () {
     return (
       <div>
-        <p>
-          {this.state.response}
-        </p>
+        {this.state.response}
       </div>
     );
   }
 }
 
-export default App;
+export default Login;
