@@ -1,0 +1,17 @@
+#root .admin-landing-page {
+  width: 50%;
+  margin: auto;
+  margin-top: 15%;
+}
+
+#root .admin-landing-container {
+  border-style: solid;
+  border-color: grey;
+  padding: 20px;
+  border-radius: 10px;
+  border-width: 2px;
+}
+
+.view-history-button {
+  margin-left: 10px;
+}

@@ -12,10 +12,13 @@
   margin-left: 10px;
 }
 
-.username {
-
+/* using the root id will override bootstrap safely, using priority scores */
+#root a {
+  color: white;
+  text-decoration: none;
 }
 
-.password {
-
+#root a:hover {
+  color: white;
+  text-decoration: none;
 }
