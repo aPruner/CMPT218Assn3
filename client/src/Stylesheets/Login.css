@@ -1,0 +1,21 @@
+.login-page {
+  width: 50%;
+  margin: auto;
+}
+
+/* Center the jumbotron vertically! This doesn't do it for all screen sizes */
+.login-jumbotron {
+  margin-top: 30%;
+}
+
+.checkin-button {
+  margin-left: 10px;
+}
+
+.username {
+
+}
+
+.password {
+
+}
