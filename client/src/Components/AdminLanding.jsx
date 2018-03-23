@@ -64,7 +64,7 @@ class AdminLandingPage extends React.Component {
     super(props);
     this.state = {
       checkedIn: false
-    }
+    };
   }
 
   handleCheckIn = () => {

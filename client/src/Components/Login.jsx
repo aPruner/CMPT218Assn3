@@ -48,7 +48,7 @@ function LoginModal(props) {
           </Form>
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' disabled={props.loginButtonDisabled} onClick={props.handleCloseLoginModal}>Log in</Button>
+          <Button color='primary' disabled={props.loginButtonDisabled} onClick={props.handleLogin}>Log in</Button>
           <Button color='secondary' onClick={props.handleCloseLoginModal}>Cancel</Button>
         </ModalFooter>
       </Modal>
@@ -62,11 +62,10 @@ class LoginPage extends React.Component {
     this.state = {
       response: '',
       loginModalOpen: false,
+      loginButtonDisabled: true,
       username: '',
-      password: '',
-      loginButtonDisabled: true
+      password: ''
     };
-
   }
 
   // express backend API example
@@ -105,6 +104,10 @@ class LoginPage extends React.Component {
     console.log('password changed');
   };
 
+  handleLogin = () => {
+
+  };
+
   render() {
     return (
       <div className='login-page'>
@@ -134,6 +137,7 @@ class LoginPage extends React.Component {
           handleCloseLoginModal={() => this.handleCloseLoginModal()}
           handleUsernameChange={() => this.handleUsernameChange()}
           handlePasswordChange={() => this.handlePasswordChange()}
+          handleLogin={() => this.handleLogin()}
           loginButtonDisabled={this.state.loginButtonDisabled}
         />
       </div>
