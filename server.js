@@ -21,18 +21,29 @@ const url = 'mongodb://adampruner:mongodb218@ds117469.mlab.com:17469/cmpt218mong
 const dbName = 'cmpt218mongodb';
 
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+MongoClient.connect(url, (err, client) => {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log('Connected to mongodb218@ds117469.mlab.com:17469/cmpt218mongodb');
 
   const db = client.db(dbName);
 
-  insertDocuments(db, function() {
-    indexCollection(db, function() {
-      client.close();
-    });
+  insertAdminUser(db, () => {
+    client.close();
   });
 });
+
+const insertAdminUser = (db, callback) => {
+  const collection = db.collection('users');
+  collection.insertOne({
+    username: 'Admin', password: 'foobar'
+  }, (err, result) => {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    assert.equal(1, result.ops.length);
+    console.log('Admin user created in users collection');
+    callback(result);
+  });
+};
 
 // Mongodb quick start boilerplate for reference
 // const insertDocuments = function(db, callback) {
