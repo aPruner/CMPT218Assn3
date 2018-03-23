@@ -1,47 +1,87 @@
 // Initial express app setup
 const express = require('express');
-
+const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 5000;
-
-app.get('/api/hello', (req, res) => {
-  res.send({ express: 'Hello From Express!' });
-});
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
 
 // Initial Mongo client setup
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-
-// Connection URL
 const url = 'mongodb://adampruner:mongodb218@ds117469.mlab.com:17469/cmpt218mongodb';
-
-// Database Name
 const dbName = 'cmpt218mongodb';
 
 // Use connect method to connect to the server
 MongoClient.connect(url, (err, client) => {
+
   assert.equal(null, err);
   console.log('Connected to mongodb218@ds117469.mlab.com:17469/cmpt218mongodb');
-
   const db = client.db(dbName);
-
-  insertAdminUser(db, () => {
-    client.close();
+  console.log('db created, configuring express server now');
+  findAdminUser(db, (admin) => {
+    if (!admin) {
+      insertAdminUser(db, () => {
+        nodeSetup(db);
+      })
+    } else {
+      nodeSetup(db);
+    }
   });
 });
+
+const nodeSetup = (db) => {
+  app.use(bodyParser.json());
+
+  app.get('/logins', (req, res) => {
+    res.send({ express: 'Login received, hello from the server side!' });
+  });
+
+  app.post('/logins', (req, res) => {
+    console.log('login received, here are the username and password');
+    console.log(req.body);
+    const username = req.body.username;
+    const password = req.body.password;
+    findAdminUser(db, (doc) => {
+      if (username === doc.username && password === doc.password) {
+        res.send({
+          loginMessage: 'Login successful!',
+          loginSuccess: true
+        });
+      } else {
+        res.send({
+          loginMessage: 'Login unsuccessful, either your username or password are incorrect!',
+          loginSuccess: false
+        });
+      }
+    })
+  });
+
+  app.listen(port, () => console.log('Listening on port ', port));
+};
 
 const insertAdminUser = (db, callback) => {
   const collection = db.collection('users');
   collection.insertOne({
-    username: 'Admin', password: 'foobar'
+    username: 'Admin',
+    password: 'foobar'
   }, (err, result) => {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
     assert.equal(1, result.ops.length);
     console.log('Admin user created in users collection');
     callback(result);
+  });
+};
+
+const findAdminUser = (db, callback) => {
+  const collection = db.collection('users');
+  collection.findOne({
+    username: 'Admin',
+    password: 'foobar'
+  }, (err, doc) => {
+    assert.equal(err, null);
+    console.log('Admin user found');
+    console.log(doc);
+    callback(doc);
   });
 };
 

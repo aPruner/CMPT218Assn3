@@ -15,6 +15,7 @@ import {
 import '../Stylesheets/Login.css';
 
 function LoginModal(props) {
+
   return (
     <div>
       <Modal isOpen={props.open}>
@@ -26,7 +27,7 @@ function LoginModal(props) {
                 Username:
               </Label>
               <Input
-                type='username'
+                type='text'
                 name='username'
                 className='username'
                 placeholder='Enter your username'
@@ -53,36 +54,20 @@ function LoginModal(props) {
         </ModalFooter>
       </Modal>
     </div>
-  )
+  );
 }
 
 class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      response: '',
       loginModalOpen: false,
       loginButtonDisabled: true,
+      loggedIn: false,
       username: '',
       password: ''
     };
   }
-
-  // express backend API example
-  // componentDidMount() {
-  //   this.callApi()
-  //     .then(res => this.setState({ response: res.express }))
-  //     .catch(err => console.log(err));
-  // }
-  //
-  // callApi = async () => {
-  //   const response = await fetch('/api/hello');
-  //   const body = await response.json();
-  //
-  //   if (response.status !== 200) throw Error(body.message);
-  //
-  //   return body;
-  // };
 
   handleOpenLoginModal = () => {
     this.setState({
@@ -96,16 +81,86 @@ class LoginPage extends React.Component {
     });
   };
 
-  handleUsernameChange = () => {
-    console.log('username changed');
+  handleUsernameChange = (event) => {
+    let newValue = undefined;
+    if (event && event.target) {
+      newValue = event.target.value;
+    }
+    this.setState({
+      username: newValue
+    }, () => {
+      if (this.state.username.length > 0 && this.state.password.length > 0) {
+        this.setState({
+          loginButtonDisabled: false
+        });
+      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
+        this.setState({
+          loginButtonDisabled: true
+        });
+      }
+    });
   };
 
-  handlePasswordChange = () => {
-    console.log('password changed');
+  handlePasswordChange = (event) => {
+    let newValue = undefined;
+    if (event && event.target) {
+      newValue = event.target.value;
+    }
+    this.setState({
+      password: newValue
+    }, () => {
+      if (this.state.username.length > 0 && this.state.password.length > 0) {
+        this.setState({
+          loginButtonDisabled: false
+        });
+      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
+        this.setState({
+          loginButtonDisabled: true
+        });
+      }
+    });
   };
 
   handleLogin = () => {
+    this.loginHelper()
+      .then((res) => {
+        if (res.loginSuccess) {
+          this.setState({
+            loggedIn: true
+          }, () => {
+            this.handleCloseLoginModal();
+          });
+        } else {
+          this.setState({
+            loggedIn: false
+          }, () => {
+            this.handleCloseLoginModal();
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  };
 
+  loginHelper = async () => {
+    const response = await fetch('/logins', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/JSON',
+        'Content-Type': 'application/JSON'
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password
+      })
+    });
+
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body.message);
+    }
+
+    return body;
   };
 
   render() {
@@ -134,9 +189,11 @@ class LoginPage extends React.Component {
         </Jumbotron>
         <LoginModal
           open={this.state.loginModalOpen}
+          username={this.state.username}
+          password={this.state.password}
           handleCloseLoginModal={() => this.handleCloseLoginModal()}
-          handleUsernameChange={() => this.handleUsernameChange()}
-          handlePasswordChange={() => this.handlePasswordChange()}
+          handleUsernameChange={(event) => this.handleUsernameChange(event)}
+          handlePasswordChange={(event) => this.handlePasswordChange(event)}
           handleLogin={() => this.handleLogin()}
           loginButtonDisabled={this.state.loginButtonDisabled}
         />
