@@ -57,149 +57,43 @@ function LoginModal(props) {
   );
 }
 
-class LoginPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loginModalOpen: false,
-      loginButtonDisabled: true,
-      loggedIn: false,
-      username: '',
-      password: ''
-    };
-  }
+function LoginPage(props) {
 
-  handleOpenLoginModal = () => {
-    this.setState({
-      loginModalOpen: true
-    });
-  };
-
-  handleCloseLoginModal = () => {
-    this.setState({
-      loginModalOpen: false
-    });
-  };
-
-  handleUsernameChange = (event) => {
-    let newValue = undefined;
-    if (event && event.target) {
-      newValue = event.target.value;
-    }
-    this.setState({
-      username: newValue
-    }, () => {
-      if (this.state.username.length > 0 && this.state.password.length > 0) {
-        this.setState({
-          loginButtonDisabled: false
-        });
-      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
-        this.setState({
-          loginButtonDisabled: true
-        });
-      }
-    });
-  };
-
-  handlePasswordChange = (event) => {
-    let newValue = undefined;
-    if (event && event.target) {
-      newValue = event.target.value;
-    }
-    this.setState({
-      password: newValue
-    }, () => {
-      if (this.state.username.length > 0 && this.state.password.length > 0) {
-        this.setState({
-          loginButtonDisabled: false
-        });
-      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
-        this.setState({
-          loginButtonDisabled: true
-        });
-      }
-    });
-  };
-
-  handleLogin = () => {
-    this.loginHelper()
-      .then((res) => {
-        if (res.loginSuccess) {
-          this.setState({
-            loggedIn: true
-          }, () => {
-            this.handleCloseLoginModal();
-          });
-        } else {
-          this.setState({
-            loggedIn: false
-          }, () => {
-            this.handleCloseLoginModal();
-          });
-        }
-      })
-      .catch((err) => console.log(err));
-  };
-
-  loginHelper = async () => {
-    const response = await fetch('/logins', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/JSON',
-        'Content-Type': 'application/JSON'
-      },
-      body: JSON.stringify({
-        username: this.state.username,
-        password: this.state.password
-      })
-    });
-
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body.message);
-    }
-
-    return body;
-  };
-
-  render() {
-    return (
-      <div className='login-page'>
-        <Jumbotron className='login-jumbotron'>
-          <h1 className='display-5'>Welcome to CMPT 218 Assignment 3!</h1>
-          <hr className='my-2' />
-          <p className='lead'>Click a button below to get started</p>
-          <div>
-            <Button
-              color='primary'
-              onClick={this.handleOpenLoginModal}
-            >
-              Log in (Admin)
-            </Button>
-            <Button
-              color='primary'
-              className='checkin-button'
-            >
-              <Link to='/checkin' className='button-link'>
-                Check in
-              </Link>
-            </Button>
-          </div>
-        </Jumbotron>
-        <LoginModal
-          open={this.state.loginModalOpen}
-          username={this.state.username}
-          password={this.state.password}
-          handleCloseLoginModal={() => this.handleCloseLoginModal()}
-          handleUsernameChange={(event) => this.handleUsernameChange(event)}
-          handlePasswordChange={(event) => this.handlePasswordChange(event)}
-          handleLogin={() => this.handleLogin()}
-          loginButtonDisabled={this.state.loginButtonDisabled}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className='login-page'>
+      <Jumbotron className='login-jumbotron'>
+        <h1 className='display-5'>Welcome to CMPT 218 Assignment 3!</h1>
+        <hr className='my-2' />
+        <p className='lead'>Click a button below to get started</p>
+        <div>
+          <Button
+            color='primary'
+            onClick={props.handleOpenLoginModal}
+          >
+            Log in (Admin)
+          </Button>
+          <Button
+            color='primary'
+            className='checkin-button'
+          >
+            <Link to='/checkin' className='button-link'>
+              Check in
+            </Link>
+          </Button>
+        </div>
+      </Jumbotron>
+      <LoginModal
+        open={props.loginModalOpen}
+        username={props.username}
+        password={props.password}
+        loginButtonDisabled={props.loginButtonDisabled}
+        handleCloseLoginModal={() => props.handleCloseLoginModal()}
+        handleUsernameChange={(event) => props.handleUsernameChange(event)}
+        handlePasswordChange={(event) => props.handlePasswordChange(event)}
+        handleLogin={() => props.handleLogin()}
+      />
+    </div>
+  );
 }
 
 export default LoginPage;
