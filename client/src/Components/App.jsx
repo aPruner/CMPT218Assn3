@@ -1,6 +1,6 @@
 import React from 'react';
 import LoginPage from './Login.jsx';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import UserCheckinPage from './UserCheckin.jsx';
 import AdminLandingPage from './AdminLanding.jsx';
 
@@ -29,12 +29,10 @@ class App extends React.Component {
   };
 
   handleLogin = () => {
-    this.loginHelper()
+    this.callLoginAPI()
       .then((res) => {
         if (res.loginSuccess) {
           this.setState({
-            username: '',
-            password: '',
             loggedIn: true
           }, () => {
             this.handleCloseLoginModal();
@@ -49,10 +47,12 @@ class App extends React.Component {
           });
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err)
+      });
   };
 
-  loginHelper = async () => {
+  callLoginAPI = async () => {
     const response = await fetch('/logins', {
       method: 'POST',
       headers: {
@@ -75,43 +75,39 @@ class App extends React.Component {
   };
 
   handleUsernameChange = (event) => {
-    let newValue = undefined;
     if (event && event.target) {
-      newValue = event.target.value;
+      this.setState({
+        username: event.target.value
+      }, () => {
+        if (this.state.username.length > 0 && this.state.password.length > 0) {
+          this.setState({
+            loginButtonDisabled: false
+          });
+        } else if (this.state.username.length === 0 && this.state.password.length === 0) {
+          this.setState({
+            loginButtonDisabled: true
+          });
+        }
+      });
     }
-    this.setState({
-      username: newValue
-    }, () => {
-      if (this.state.username.length > 0 && this.state.password.length > 0) {
-        this.setState({
-          loginButtonDisabled: false
-        });
-      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
-        this.setState({
-          loginButtonDisabled: true
-        });
-      }
-    });
   };
 
   handlePasswordChange = (event) => {
-    let newValue = undefined;
     if (event && event.target) {
-      newValue = event.target.value;
+      this.setState({
+        password: event.target.value
+      }, () => {
+        if (this.state.username.length > 0 && this.state.password.length > 0) {
+          this.setState({
+            loginButtonDisabled: false
+          });
+        } else if (this.state.username.length === 0 && this.state.password.length === 0) {
+          this.setState({
+            loginButtonDisabled: true
+          });
+        }
+      });
     }
-    this.setState({
-      password: newValue
-    }, () => {
-      if (this.state.username.length > 0 && this.state.password.length > 0) {
-        this.setState({
-          loginButtonDisabled: false
-        });
-      } else if (this.state.username.length === 0 && this.state.password.length === 0) {
-        this.setState({
-          loginButtonDisabled: true
-        });
-      }
-    });
   };
 
   render() {
@@ -131,19 +127,37 @@ class App extends React.Component {
       );
     };
 
+    const RenderAdminLandingPage = () => {
+      return (
+        <AdminLandingPage
+          username={this.state.username}
+        />
+      );
+    };
+
+    let AdminRoute = <Redirect to='/' from='/admin'/>;
+    if (this.state.loggedIn) {
+      AdminRoute = <Route path='/admin' render={RenderAdminLandingPage}/>;
+    }
+
+    let LoginRoute = <Redirect to='/admin' from='/'/>;
+    if (!this.state.loggedIn) {
+      LoginRoute = <Route
+        exact
+        path='/'
+        render={RenderLoginPage}
+      />;
+    }
+
     return (
       <div>
         <Router>
           <div>
             {/*<AppNav /> goes here if implemented */}
             <div className='page-container'>
-              <Route
-                exact
-                path='/'
-                render={RenderLoginPage}
-              />
+              {LoginRoute}
               <Route path='/checkin' component={UserCheckinPage}/>
-              <Route path='/admin' component={AdminLandingPage}/>
+              {AdminRoute}
             </div>
           </div>
         </Router>

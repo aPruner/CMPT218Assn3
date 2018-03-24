@@ -9,29 +9,31 @@ import {
 } from 'reactstrap';
 import '../Stylesheets/AdminLanding.css';
 
-function AdminCheckinForm(props) {
+function AdminStartEventForm(props) {
   return (
     <Container className='admin-landing-container'>
-      <h1 className='display-5'>Welcome, (Username) !</h1>
+      <h1 className='display-5'>Welcome, {props.username} !</h1>
       <hr className='my-2' />
       <Form>
         <FormGroup>
-          <Label for='checkinId'>
+          <Label for='courseId'>
             Course id:
           </Label>
           <Input
-            type='checkinId'
-            name='checkinId'
-            className='checkinId'
+            type='text'
+            name='courseId'
+            className='courseId'
             placeholder='Enter your course id'
+            onChange={props.handleCourseIdChange}
           />
         </FormGroup>
       </Form>
       <Button
         color='primary'
-        onClick={props.handleCheckIn}
+        disabled={props.startEventButtonDisabled}
+        onClick={props.handleStartEvent}
       >
-        Check in
+        Start Event
       </Button>
       <Button
         color='primary'
@@ -43,17 +45,17 @@ function AdminCheckinForm(props) {
   );
 }
 
-function AdminCheckoutForm(props) {
+function AdminStopEventForm(props) {
   return (
     <Container className='admin-landing-container'>
-      <h1 className='display-5'>Welcome, (Username) !</h1>
+      <h1 className='display-5'>Welcome, {props.username} !</h1>
       <hr className='my-2' />
-      <p className='lead'>You're checked in for the following course:</p>
+      <p className='lead'>You've started an event for the following course: {props.courseId}</p>
       <Button
         color='primary'
-        onClick={props.handleCheckOut}
+        onClick={props.handleStopEvent}
       >
-        Check out
+        Stop Event
       </Button>
     </Container>
   );
@@ -63,36 +65,95 @@ class AdminLandingPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checkedIn: false
+      eventActive: false,
+      startEventButtonDisabled: true,
+      courseId: ''
     };
   }
 
-  handleCheckIn = () => {
+  callEventAPI = async () => {
+    const response = await fetch('/events', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/JSON',
+        'Content-Type': 'application/JSON'
+      },
+      body: JSON.stringify({
+        courseId: this.state.courseId
+      })
+    });
+
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body.message);
+    }
+
+    return body;
+  };
+
+  handleStartEvent = () => {
+    this.callEventAPI()
+      .then((res) => {
+        if (res.eventSuccess) {
+          this.setState({
+            eventActive: true
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+  };
+
+  handleStopEvent = () => {
     this.setState({
-      checkedIn: true
+      eventActive: false
     });
   };
 
-  handleCheckOut = () => {
-    this.setState({
-      checkedIn: false
-    });
+  handleCourseIdChange = (event) => {
+    if (event && event.target) {
+      this.setState({
+        courseId: event.target.value
+      }, () => {
+        if (this.state.courseId === '') {
+          this.setState({
+            startEventButtonDisabled: true
+          });
+        } else {
+          this.setState({
+            startEventButtonDisabled: false
+          });
+        }
+      });
+    }
   };
 
-  render() {
-    let adminPage = null;
-    if (this.state.checkedIn) {
-      adminPage = <AdminCheckoutForm
-        handleCheckOut={() => this.handleCheckOut()}
+  componentWillMount () {
+
+  }
+
+  render () {
+    let AdminPage = null;
+    if (this.state.eventActive) {
+      AdminPage = <AdminStopEventForm
+        username={this.props.username}
+        courseId={this.state.courseId}
+        handleCheckOut={() => this.handleStopEvent()}
       />;
     } else {
-      adminPage = <AdminCheckinForm
-        handleCheckIn={() => this.handleCheckIn()}
+      AdminPage = <AdminStartEventForm
+        username={this.props.username}
+        startEventButtonDisabled={this.state.startEventButtonDisabled}
+        handleStartEvent={() => this.handleStartEvent()}
+        handleCourseIdChange={(event) => this.handleCourseIdChange(event)}
       />;
     }
     return (
       <div className='admin-landing-page'>
-        {adminPage}
+        {AdminPage}
       </div>
     );
   }

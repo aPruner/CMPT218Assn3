@@ -32,11 +32,11 @@ const nodeSetup = (db) => {
   app.use(bodyParser.json());
 
   app.get('/logins', (req, res) => {
-    res.send({ express: 'Login received, hello from the server side!' });
+    res.send({ message: 'Hello from the server side!' });
   });
 
   app.post('/logins', (req, res) => {
-    console.log('login received, here are the username and password');
+    console.log('login POST request received, here are the username and password');
     console.log(req.body);
     const username = req.body.username;
     const password = req.body.password;
@@ -55,14 +55,29 @@ const nodeSetup = (db) => {
     })
   });
 
-  app.listen(port, () => console.log('Listening on port ', port));
+  app.get('/events', (req, res) => {
+    res.send({ message: 'Hello from the server side!' });
+  });
+
+  app.post('/events', (req, res) => {
+    console.log('event POST request received');
+    const courseId = req.body.courseId;
+    insertNewEvent(db, courseId, () => {
+      res.send({
+        eventMessage: 'New event created for course: ' + courseId,
+        eventSuccess: true
+      });
+    });
+  });
+
+  app.listen(port, () => console.log('Listening on port', port));
 };
 
 const insertAdminUser = (db, callback) => {
   const collection = db.collection('users');
   collection.insertOne({
-    username: 'Admin',
-    password: 'foobar'
+    username: 'admin',
+    password: '1234'
   }, (err, result) => {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
@@ -75,14 +90,32 @@ const insertAdminUser = (db, callback) => {
 const findAdminUser = (db, callback) => {
   const collection = db.collection('users');
   collection.findOne({
-    username: 'Admin',
-    password: 'foobar'
+    username: 'admin',
+    password: '1234'
   }, (err, doc) => {
     assert.equal(err, null);
-    console.log('Admin user found');
-    console.log(doc);
     callback(doc);
   });
+};
+
+const insertNewEvent = (db, courseId, callback) => {
+  const collection = db.collection('events');
+  let newId = 1;
+  collection.find({}).toArray((err, docs) => {
+    newId = docs.length + 1;
+  });
+  collection.insertOne({
+    courseId: courseId,
+    active: true,
+    checkins: [],
+    id: newId
+  }, (err, result) => {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    assert.equal(1, result.ops.length);
+    console.log('New event created in events collection, for course:', courseId);
+    callback(result);
+  })
 };
 
 // Mongodb quick start boilerplate for reference

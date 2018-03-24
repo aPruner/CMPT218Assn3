@@ -49,8 +49,21 @@ function LoginModal(props) {
           </Form>
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' disabled={props.loginButtonDisabled} onClick={props.handleLogin}>Log in</Button>
-          <Button color='secondary' onClick={props.handleCloseLoginModal}>Cancel</Button>
+          <Link to='/admin'>
+            <Button
+              color='primary'
+              disabled={props.loginButtonDisabled}
+              onClick={props.handleLogin}
+            >
+              Log in
+            </Button>
+          </Link>
+          <Button
+            color='secondary'
+            onClick={props.handleCloseLoginModal}
+          >
+            Cancel
+          </Button>
         </ModalFooter>
       </Modal>
     </div>
