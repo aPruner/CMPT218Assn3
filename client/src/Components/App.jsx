@@ -29,7 +29,7 @@ class App extends React.Component {
   };
 
   handleLogin = () => {
-    this.callLoginAPI()
+    this.login()
       .then((res) => {
         if (res.loginSuccess) {
           this.setState({
@@ -52,7 +52,7 @@ class App extends React.Component {
       });
   };
 
-  callLoginAPI = async () => {
+  login = async () => {
     const response = await fetch('/logins', {
       method: 'POST',
       headers: {

@@ -71,7 +71,7 @@ class AdminLandingPage extends React.Component {
     };
   }
 
-  callEventAPI = async () => {
+  createEvent = async () => {
     const response = await fetch('/events', {
       method: 'POST',
       headers: {
@@ -92,8 +92,26 @@ class AdminLandingPage extends React.Component {
     return body;
   };
 
+  deactivateEvent = async () => {
+    const response = await fetch('/events', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/JSON',
+        'Content-Type': 'application/JSON'
+      },
+    });
+
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body.message);
+    }
+
+    return body;
+  };
+
   handleStartEvent = () => {
-    this.callEventAPI()
+    this.createEvent()
       .then((res) => {
         if (res.eventSuccess) {
           this.setState({
@@ -104,13 +122,20 @@ class AdminLandingPage extends React.Component {
       .catch((err) => {
         console.log(err);
       });
-
   };
 
   handleStopEvent = () => {
-    this.setState({
-      eventActive: false
-    });
+    this.deactivateEvent()
+      .then((res) => {
+        if (res.eventSuccess) {
+          this.setState({
+            eventActive: false
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   handleCourseIdChange = (event) => {
@@ -141,7 +166,7 @@ class AdminLandingPage extends React.Component {
       AdminPage = <AdminStopEventForm
         username={this.props.username}
         courseId={this.state.courseId}
-        handleCheckOut={() => this.handleStopEvent()}
+        handleStopEvent={() => this.handleStopEvent()}
       />;
     } else {
       AdminPage = <AdminStartEventForm

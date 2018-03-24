@@ -40,8 +40,8 @@ const nodeSetup = (db) => {
     console.log(req.body);
     const username = req.body.username;
     const password = req.body.password;
-    findAdminUser(db, (doc) => {
-      if (username === doc.username && password === doc.password) {
+    findAdminUser(db, (result) => {
+      if (result && username === result.username && password === result.password) {
         res.send({
           loginMessage: 'Login successful!',
           loginSuccess: true
@@ -56,7 +56,15 @@ const nodeSetup = (db) => {
   });
 
   app.get('/events', (req, res) => {
-    res.send({ message: 'Hello from the server side!' });
+    console.log('event GET request received');
+    // const courseId = req.body.courseId; // shouldn't need this, since there will only ever be one active event
+    deactivateEvent(db, () => {
+      res.send({
+        eventMessage: 'Event successfully deactivated',
+        eventSuccess: true
+      });
+    })
+
   });
 
   app.post('/events', (req, res) => {
@@ -92,9 +100,9 @@ const findAdminUser = (db, callback) => {
   collection.findOne({
     username: 'admin',
     password: '1234'
-  }, (err, doc) => {
+  }, (err, result) => {
     assert.equal(err, null);
-    callback(doc);
+    callback(result);
   });
 };
 
@@ -103,19 +111,31 @@ const insertNewEvent = (db, courseId, callback) => {
   let newId = 1;
   collection.find({}).toArray((err, docs) => {
     newId = docs.length + 1;
+    collection.insertOne({
+      courseId: courseId,
+      active: true,
+      checkins: [],
+      id: newId
+    }, (err, result) => {
+      assert.equal(err, null);
+      assert.equal(1, result.result.n);
+      assert.equal(1, result.ops.length);
+      console.log('New event created in events collection, for course:', courseId);
+      callback(result);
+    })
   });
-  collection.insertOne({
-    courseId: courseId,
-    active: true,
-    checkins: [],
-    id: newId
+};
+
+const deactivateEvent = (db, callback) => {
+  const collection = db.collection('events');
+  // There should only ever be one active event at a time in the events collection
+  collection.findOneAndUpdate({active: true}, {$set: {active: false}}, {
+    returnOriginal: false
   }, (err, result) => {
     assert.equal(err, null);
-    assert.equal(1, result.result.n);
-    assert.equal(1, result.ops.length);
-    console.log('New event created in events collection, for course:', courseId);
-    callback(result);
-  })
+    assert.equal(false, result.value.active);
+    callback();
+  });
 };
 
 // Mongodb quick start boilerplate for reference

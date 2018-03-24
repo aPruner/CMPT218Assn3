@@ -1,0 +1,13 @@
+#root .user-checkin-page {
+  width: 50%;
+  margin: auto;
+  margin-top: 15%;
+}
+
+#root .user-checkin-container {
+  border-style: solid;
+  border-color: grey;
+  padding: 20px;
+  border-radius: 10px;
+  border-width: 2px;
+}
