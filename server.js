@@ -83,6 +83,23 @@ const nodeSetup = (db) => {
           });
         }
       });
+    } else if (req.headers.type === 'fetchHistory') {
+      findEventsByCourseId(db, req.headers.courseid, (results) => {
+        if (results) {
+          console.log('found events with that course ID, they are:', results);
+          res.send({
+            eventMessage: 'There was at least one event with this course ID found',
+            events: results,
+            eventSuccess: true
+          })
+        } else {
+          res.send({
+            eventMessage: 'There were no events with this course ID found',
+            events: [],
+            eventSuccess: true
+          })
+        }
+      })
     }
   });
 
@@ -136,6 +153,15 @@ const insertAdminUser = (db, callback) => {
   });
 };
 
+const findEventsByCourseId = (db, courseId, callback) => {
+  const collection = db.collection('events');
+  console.log('CourseId is:', courseId);
+  collection.find({courseId: courseId, active: false}).toArray((err, results) => {
+    assert.equal(err, null);
+    callback(results);
+  })
+};
+
 const findAdminUser = (db, callback) => {
   const collection = db.collection('users');
   collection.findOne({
@@ -169,8 +195,8 @@ const findActiveEvent = (db, callback) => {
 const insertNewEvent = (db, courseId, callback) => {
   const collection = db.collection('events');
   let newId = 1;
-  collection.find({}).toArray((err, docs) => {
-    newId = docs.length + 1;
+  collection.find({}).toArray((err, results) => {
+    newId = results.length + 1;
     collection.insertOne({
       courseId: courseId,
       active: true,

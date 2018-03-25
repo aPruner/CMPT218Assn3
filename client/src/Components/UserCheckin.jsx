@@ -113,9 +113,9 @@ class UserCheckinPage extends React.Component {
   };
 
   render() {
-    let checkInForm = null;
+    let CheckInForm = null;
     if (!this.state.checkedIn) {
-      checkInForm =
+      CheckInForm =
         <div>
           <h1 className='display-5'>Welcome anonymous user!</h1>
           <hr className='my-2'/>
@@ -163,13 +163,13 @@ class UserCheckinPage extends React.Component {
           </Button>
         </div>;
     } else {
-      checkInForm = <h1 className='display-5'>Thanks for checking in! Enjoy the event!</h1>;
+      CheckInForm = <h1 className='display-5'>Thanks for checking in! Enjoy the event!</h1>;
     }
 
     return (
       <div className='user-checkin-page'>
         <Container className='user-checkin-container'>
-          {checkInForm}
+          {CheckInForm}
         </Container>
       </div>
     );
