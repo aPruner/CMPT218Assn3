@@ -32,7 +32,9 @@ const nodeSetup = (db) => {
   app.use(bodyParser.json());
 
   app.get('/logins', (req, res) => {
-    res.send({ message: 'Hello from the server side!' });
+    res.send({
+      message: 'Hello from the server side!'
+    });
   });
 
   app.post('/logins', (req, res) => {
@@ -57,14 +59,31 @@ const nodeSetup = (db) => {
 
   app.get('/events', (req, res) => {
     console.log('event GET request received');
-    // const courseId = req.body.courseId; // shouldn't need this, since there will only ever be one active event
-    deactivateEvent(db, () => {
-      res.send({
-        eventMessage: 'Event successfully deactivated',
-        eventSuccess: true
+    console.log('request type is', req.headers.type);
+    if (req.headers.type === 'deactivateEvent') {
+      deactivateEvent(db, () => {
+        res.send({
+          eventMessage: 'Event successfully deactivated',
+          eventSuccess: true
+        });
+      })
+    } else if (req.headers.type === 'determineActive') {
+      findActiveEvent(db, (result) => {
+        if (!result) {
+          res.send({
+            eventMessage: 'There is no active event',
+            activeEventExists: false,
+            eventSuccess: true
+          });
+        } else {
+          res.send({
+            eventMessage: 'There is an active event',
+            activeEventExists: true,
+            eventSuccess: true
+          });
+        }
       });
-    })
-
+    }
   });
 
   app.post('/events', (req, res) => {
@@ -73,6 +92,28 @@ const nodeSetup = (db) => {
     insertNewEvent(db, courseId, () => {
       res.send({
         eventMessage: 'New event created for course: ' + courseId,
+        eventSuccess: true
+      });
+    });
+  });
+
+  app.get('/checkins', (req, res) => {
+    console.log('checkin GET request received');
+    res.send({
+      message: 'Hello from the server side!'
+    });
+  });
+
+  app.post('/checkins', (req, res) => {
+    console.log('checkin POST request received');
+    const checkIn = {
+      checkInString: req.body.checkInString,
+      name: req.body.name,
+      userId: req.body.userId
+    };
+    checkInToCurrentActiveEvent(db, checkIn, (result) => {
+      res.send({
+        eventMessage: 'New checkin created for event id: ' + result.value.id,
         eventSuccess: true
       });
     });
@@ -106,6 +147,25 @@ const findAdminUser = (db, callback) => {
   });
 };
 
+const checkInToCurrentActiveEvent = (db, checkIn, callback) => {
+  const collection = db.collection('events');
+  collection.findOneAndUpdate({active: true}, {$push: {checkIns: checkIn}}, {
+    returnOriginal: false,
+    upsert: true
+  }, (err, result) => {
+    assert.equal(err, null);
+    callback(result);
+  });
+};
+
+const findActiveEvent = (db, callback) => {
+  const collection = db.collection('events');
+  collection.findOne({active: true}, (err, result) => {
+    assert.equal(err, null);
+    callback(result)
+  });
+};
+
 const insertNewEvent = (db, courseId, callback) => {
   const collection = db.collection('events');
   let newId = 1;
@@ -114,7 +174,7 @@ const insertNewEvent = (db, courseId, callback) => {
     collection.insertOne({
       courseId: courseId,
       active: true,
-      checkins: [],
+      checkIns: [],
       id: newId
     }, (err, result) => {
       assert.equal(err, null);
@@ -122,7 +182,7 @@ const insertNewEvent = (db, courseId, callback) => {
       assert.equal(1, result.ops.length);
       console.log('New event created in events collection, for course:', courseId);
       callback(result);
-    })
+    });
   });
 };
 
@@ -134,7 +194,7 @@ const deactivateEvent = (db, callback) => {
   }, (err, result) => {
     assert.equal(err, null);
     assert.equal(false, result.value.active);
-    callback();
+    callback(result);
   });
 };
 

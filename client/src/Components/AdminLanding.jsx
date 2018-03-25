@@ -9,6 +9,13 @@ import {
 } from 'reactstrap';
 import '../Stylesheets/AdminLanding.css';
 
+function History(props) {
+  return (
+    <div>
+    </div>
+  );
+}
+
 function AdminStartEventForm(props) {
   return (
     <Container className='admin-landing-container'>
@@ -92,13 +99,33 @@ class AdminLandingPage extends React.Component {
     return body;
   };
 
+  determineIfEventActive = async () => {
+    const response = await fetch('/events', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/JSON',
+        'Content-Type': 'application/JSON',
+        'Type': 'determineActive'
+      }
+    });
+
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body.message);
+    }
+
+    return body;
+  };
+
   deactivateEvent = async () => {
     const response = await fetch('/events', {
       method: 'GET',
       headers: {
         'Accept': 'application/JSON',
-        'Content-Type': 'application/JSON'
-      },
+        'Content-Type': 'application/JSON',
+        'Type': 'deactivateEvent'
+      }
     });
 
     const body = await response.json();
@@ -157,7 +184,21 @@ class AdminLandingPage extends React.Component {
   };
 
   componentWillMount () {
-
+    this.determineIfEventActive()
+      .then((res) => {
+        if (res.activeEventExists) {
+          this.setState({
+            eventActive: true
+          })
+        } else {
+          this.setState({
+            eventActive: false
+          })
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
   }
 
   render () {
