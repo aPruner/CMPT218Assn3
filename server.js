@@ -72,12 +72,14 @@ const nodeSetup = (db) => {
         if (!result) {
           res.send({
             eventMessage: 'There is no active event',
+            eventCourseId: '',
             activeEventExists: false,
             eventSuccess: true
           });
         } else {
           res.send({
             eventMessage: 'There is an active event',
+            eventCourseId: result.courseId,
             activeEventExists: true,
             eventSuccess: true
           });

@@ -214,6 +214,8 @@ class AdminLandingPage extends React.Component {
         if (res.eventSuccess) {
           this.setState({
             eventActive: false
+          }, () => {
+            this.handleViewHistory()
           });
         }
       })
@@ -240,8 +242,12 @@ class AdminLandingPage extends React.Component {
 
   handleBackFromHistory = () => {
     this.setState({
-      history: [],
-      viewHistory: false
+      eventActive: false,
+      startEventButtonDisabled: true,
+      viewHistoryButtonDisabled: true,
+      viewHistory: false,
+      courseId: '',
+      history: []
     })
   };
 
@@ -270,7 +276,8 @@ class AdminLandingPage extends React.Component {
       .then((res) => {
         if (res.activeEventExists) {
           this.setState({
-            eventActive: true
+            eventActive: true,
+            courseId: res.eventCourseId
           })
         } else {
           this.setState({
