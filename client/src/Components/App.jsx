@@ -1,6 +1,6 @@
 import React from 'react';
-import LoginPage from './Login.jsx';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import LoginPage from './Login.jsx';
 import UserCheckinPage from './UserCheckin.jsx';
 import AdminLandingPage from './AdminLanding.jsx';
 
@@ -150,15 +150,12 @@ class App extends React.Component {
     }
 
     return (
-      <div>
+      <div className='page-container'>
         <Router>
-          <div>
-            {/*<AppNav /> goes here if implemented */}
-            <div className='page-container'>
-              {LoginRoute}
-              <Route path='/checkin' component={UserCheckinPage}/>
-              {AdminRoute}
-            </div>
+          <div className='router'>
+            {LoginRoute}
+            <Route path='/checkin' component={UserCheckinPage}/>
+            {AdminRoute}
           </div>
         </Router>
       </div>
