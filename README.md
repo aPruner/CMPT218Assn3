@@ -2,7 +2,7 @@
 
 This is the repository for CMPT 218 Assignment 3!
 
-### Installation
+### Installating
 
 In the root folder run: 
 ```
